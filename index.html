@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PartyPilot</title>
+<meta name="description" content="Plan the food, decorations and drinks for any party, with a live budget and ready-to-order shopping lists.">
+<meta name="theme-color" content="#1f7a4d">
+<link rel="manifest" href="/manifest.json">
+<link rel="icon" href="/icon-192.png">
+<link rel="apple-touch-icon" href="/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="PartyPilot">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f5ef; --card:#ffffff; --ink:#1d2a22; --muted:#6b756e; --line:#e4e0d6;
+  --accent:#1f7a4d; --accent-soft:#e3f1e8; --gold:#c99a2e; --warn:#b4471f; --warn-soft:#fbe9e1;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,sans-serif;font-size:15px;line-height:1.5}
+header{padding:28px 24px 8px;max-width:1180px;margin:0 auto}
+.brand{font-family:'DM Serif Display',serif;font-size:34px;margin:0;letter-spacing:.2px}
+.brand span{color:var(--accent)}
+.tag{color:var(--muted);margin:2px 0 0}
+.demo{display:inline-block;margin-top:10px;font-size:12px;background:#fff3d6;color:#7a5a12;padding:3px 10px;border-radius:99px}
+main{max-width:1180px;margin:0 auto;padding:12px 24px 60px;display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+@media(max-width:900px){main{grid-template-columns:1fr}.side{position:static!important}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:20px}
+h2{font-family:'DM Serif Display',serif;font-weight:400;font-size:24px;margin:0 0 4px}
+.step{font-size:12px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.08em}
+.sub{color:var(--muted);margin:0 0 16px}
+.form{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+@media(max-width:700px){.form{grid-template-columns:1fr 1fr}}
+label{display:block;font-size:13px;font-weight:500;margin-bottom:5px}
+input,select{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font:inherit;background:#fff;color:var(--ink)}
+input:focus,select:focus{outline:2px solid var(--accent-soft);border-color:var(--accent)}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1px solid var(--line);background:#fff;border-radius:99px;padding:7px 14px;cursor:pointer;font:inherit;font-size:14px;color:var(--ink)}
+.chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn{background:var(--accent);color:#fff;border:0;border-radius:12px;padding:12px 20px;font:inherit;font-weight:600;cursor:pointer}
+.btn:hover{filter:brightness(1.08)}
+.btn.ghost{background:#fff;color:var(--accent);border:1px solid var(--accent)}
+.err{color:var(--warn);font-size:13px;margin-top:8px;min-height:18px}
+.cat{margin-top:26px}
+.cat:first-of-type{margin-top:8px}
+.cat h3{margin:0 0 10px;font-size:16px;display:flex;justify-content:space-between;align-items:baseline}
+.cat h3 small{font-weight:400;color:var(--muted);font-size:13px}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media(max-width:700px){.opts{grid-template-columns:1fr}}
+.opt{border:1.5px solid var(--line);border-radius:14px;padding:14px;cursor:pointer;background:#fff;transition:border-color .15s,background .15s;text-align:left;font:inherit;color:var(--ink)}
+.opt:hover{border-color:#b9c9bd}
+.opt.on{border-color:var(--accent);background:var(--accent-soft)}
+.opt .t{font-weight:600}
+.opt .d{color:var(--muted);font-size:13px;margin:2px 0 10px}
+.opt ul{margin:0;padding-left:16px;font-size:13px}
+.opt .p{margin-top:10px;font-weight:600;color:var(--accent)}
+.side{position:sticky;top:16px}
+.total{font-family:'DM Serif Display',serif;font-size:40px;line-height:1.1}
+.pp{color:var(--muted);font-size:13px}
+.bar{height:10px;background:#efece4;border-radius:99px;overflow:hidden;margin:14px 0 6px}
+.bar i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .3s}
+.bar.over i{background:var(--warn)}
+.status{font-size:13px}
+.rows{margin-top:14px;border-top:1px solid var(--line)}
+.row{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.row span:first-child{color:var(--muted)}
+.vend{margin-top:18px}
+.vbox{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:14px}
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px;flex-wrap:wrap}
+.vhead b{font-size:16px}
+.vlink{background:var(--ink);color:#fff;text-decoration:none;padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500}
+table{width:100%;border-collapse:collapse;font-size:14px}
+td{padding:7px 4px;border-top:1px solid #f0ede5}
+td.q{color:var(--muted);white-space:nowrap}
+td.c{text-align:right;white-space:nowrap}
+td a{color:var(--accent);font-size:12px;text-decoration:none;margin-left:6px}
+.note{font-size:12px;color:var(--muted);margin-top:6px}
+.hidden{display:none}
+.toast{font-size:13px;color:var(--accent);margin-left:4px}
+.saved{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--line)}
+.saved:first-child{border-top:0}
+.saved button{font:inherit;font-size:13px;border:0;background:none;color:var(--accent);cursor:pointer;padding:4px 6px}
+.saved button.del{color:var(--muted)}
+</style>
+</head>
+<body>
+<header>
+  <h1 class="brand">Party<span>Pilot</span></h1>
+  <p class="tag">Tell us the party. We'll plan the food, the look and the bar, then fill your carts.</p>
+  <span class="demo">Beta · prices are estimates</span>
+</header>
+
+<main>
+<div>
+  <section class="card hidden" id="saved">
+    <div class="step">My parties</div>
+    <div id="savedList"></div>
+  </section>
+
+  <section class="card" id="setup">
+    <div class="step">Step 1</div>
+    <h2>Describe the party</h2>
+    <p class="sub">Five quick answers. You can tweak everything on the next screen.</p>
+    <form id="setupForm" novalidate>
+      <div class="form">
+        <div><label for="occ">Occasion</label>
+          <select id="occ"><option value="stpat">St. Patrick's Day</option><option value="superbowl">Super Bowl</option></select></div>
+        <div><label for="guests">Guests</label><input id="guests" type="number" min="4" max="300" value="40"></div>
+        <div><label for="hours">Party length (hours)</label><input id="hours" type="number" min="1" max="12" value="4"></div>
+        <div><label for="date">Date</label><input id="date" type="date" value="2027-03-13"></div>
+        <div><label for="zip">Zip code</label><input id="zip" type="text" inputmode="numeric" maxlength="5" value="02657"></div>
+        <div><label for="budget">Budget ($)</label><input id="budget" type="number" min="0" value="1200"></div>
+      </div>
+      <div style="margin-top:16px"><label>How much will this crowd drink?</label>
+        <div class="chips" id="drinkChips">
+          <button type="button" class="chip" data-v="0.7">Light</button>
+          <button type="button" class="chip on" data-v="1">Average</button>
+          <button type="button" class="chip" data-v="1.3">Heavy</button>
+        </div></div>
+      <div style="margin-top:18px"><button class="btn" type="submit">Show me options</button></div>
+      <div class="err" id="err"></div>
+    </form>
+  </section>
+
+  <section class="card hidden" id="options">
+    <div class="step">Step 2</div>
+    <h2 id="optTitle">Pick your plan</h2>
+    <p class="sub">Choose one in each category. Quantities are sized to your guest count and party length.</p>
+    <div id="cats"></div>
+    <div style="margin-top:22px"><button class="btn" id="toList">Build my shopping list</button></div>
+  </section>
+
+  <section class="card hidden" id="list">
+    <div class="step">Step 3</div>
+    <h2>Your shopping list</h2>
+    <p class="sub">Split by where it ships from. In the full app each button fills a cart in one tap; in this prototype the links search each store.</p>
+    <div id="vendors" class="vend"></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+      <button class="btn" id="saveBtn">Save party</button>
+      <button class="btn ghost" id="shareBtn">Copy share link</button>
+      <button class="btn ghost" id="copyBtn">Copy full list</button>
+      <span class="toast" id="toast"></span>
+    </div>
+  </section>
+</div>
+
+<aside class="side">
+  <div class="card">
+    <div class="step">Live budget</div>
+    <div class="total" id="total">$0</div>
+    <div class="pp" id="pp">Pick options to see your total</div>
+    <div class="bar" id="bar"><i id="barFill" style="width:0"></i></div>
+    <div class="status" id="status"></div>
+    <div class="rows" id="rows"></div>
+    <p class="note">Includes party basics (ice, cups, trash bags) sized automatically.</p>
+  </div>
+</aside>
+</main>
+
+<script>
+const V = {
+  instacart:{name:'Instacart', desc:'Food, ice & mixers', url:q=>'https://www.instacart.com/store/s?k='+encodeURIComponent(q)},
+  amazon:{name:'Amazon', desc:'Decorations & supplies', url:q=>'https://www.amazon.com/s?k='+encodeURIComponent(q)},
+  alcohol:{name:'Alcohol partner', desc:'Licensed delivery (e.g. ReserveBar)', url:q=>'https://www.reservebar.com/search?q='+encodeURIComponent(q)}
+};
+// basis: guest (perGuest units, scaled by food factor) | fixed (qty) | drinks (share of total drinks, dpu drinks per pack)
+const DATA = {
+ stpat:{label:"St. Patrick's Day", cats:{
+  food:{label:'Food', opts:[
+   {t:'Pub classics', d:'A real meal: sliders, sides, pretzels', items:[
+    {n:'Corned beef brisket (3 lb)',v:'instacart',b:'guest',pg:0.3,pack:3,price:27},
+    {n:'Slider rolls (12-pack)',v:'instacart',b:'guest',pg:2,pack:12,price:5},
+    {n:'Cabbage & potato salad (3 lb tray)',v:'instacart',b:'guest',pg:0.25,pack:3,price:15},
+    {n:'Soft pretzels (6-pack)',v:'instacart',b:'guest',pg:1,pack:6,price:8},
+    {n:'Beer cheese dip (16 oz)',v:'instacart',b:'guest',pg:0.08,pack:1,price:6}]},
+   {t:'Irish pub bites', d:'Heavy appetizers, easy to graze',items:[
+    {n:'Mini shepherd’s pies, frozen (12)',v:'instacart',b:'guest',pg:2,pack:12,price:14},
+    {n:'Reuben dip + rye crisps (tray)',v:'instacart',b:'guest',pg:0.08,pack:1,price:18},
+    {n:'Irish cheddar (1 lb)',v:'instacart',b:'guest',pg:0.1,pack:1,price:12},
+    {n:'Loaded potato skins, frozen (20)',v:'instacart',b:'guest',pg:3,pack:20,price:10}]},
+   {t:'Budget snacks', d:'Keep it simple and cheap',items:[
+    {n:'Party sub, 6 ft (serves 25)',v:'instacart',b:'guest',pg:0.04,pack:1,price:90},
+    {n:'Chips (family bag)',v:'instacart',b:'guest',pg:0.125,pack:1,price:5},
+    {n:'Veggie tray (serves 15)',v:'instacart',b:'guest',pg:0.067,pack:1,price:25},
+    {n:'Shamrock sugar cookies (12)',v:'instacart',b:'guest',pg:2,pack:12,price:8}]}]},
+  decor:{label:'Decorations', opts:[
+   {t:'Classic green & gold', d:'Balloons, banner, themed tableware',items:[
+    {n:'Green & gold balloon garland kit',v:'amazon',b:'fixed',q:1,price:25},
+    {n:'Shamrock banner',v:'amazon',b:'fixed',q:1,price:10},
+    {n:'Green tablecloths',v:'amazon',b:'guest',pg:0.1,pack:1,price:3},
+    {n:'Shamrock plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Irish pub night', d:'Warm lights, chalkboards, kraft paper',items:[
+    {n:'Warm string lights (50 ft)',v:'amazon',b:'fixed',q:1,price:18},
+    {n:'Chalkboard signs (set of 4)',v:'amazon',b:'fixed',q:1,price:20},
+    {n:'Irish flag bunting',v:'amazon',b:'fixed',q:1,price:14},
+    {n:'Kraft plates & napkins (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:14}]},
+   {t:'Minimal', d:'Just the essentials, in green',items:[
+    {n:'Green plates/napkins combo (serves 50)',v:'amazon',b:'guest',pg:1,pack:50,price:28},
+    {n:'Shamrock table confetti',v:'amazon',b:'fixed',q:1,price:6}]}]},
+  drinks:{label:'Alcohol', opts:[
+   {t:'Beer & whiskey', d:'Stout, red ale and Irish whiskey',items:[
+    {n:'Guinness Draught (24 cans)',v:'alcohol',b:'drinks',share:0.45,dpu:24,price:38},
+    {n:'Irish red ale (24 cans)',v:'alcohol',b:'drinks',share:0.2,dpu:24,price:34},
+    {n:'Jameson Irish Whiskey (750 ml)',v:'alcohol',b:'drinks',share:0.35,dpu:16,price:32},
+    {n:'Ginger ale (2 L)',v:'instacart',b:'drinks',share:0.35,dpu:8,price:3}]},
+   {t:'Green beer party', d:'Light lager, green dye, a few shots',items:[
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.8,dpu:30,price:25},
+    {n:'Green food coloring',v:'instacart',b:'fixed',q:1,price:4},
+    {n:'Irish whiskey for shots (750 ml)',v:'alcohol',b:'drinks',share:0.2,dpu:16,price:28}]},
+   {t:'Beer & wine', d:'Something for everyone',items:[
+    {n:'Guinness Draught (24 cans)',v:'alcohol',b:'drinks',share:0.5,dpu:24,price:38},
+    {n:'Hard cider (12-pack)',v:'alcohol',b:'drinks',share:0.2,dpu:12,price:18},
+    {n:'White & red wine (bottle)',v:'alcohol',b:'drinks',share:0.3,dpu:5,price:14}]}]}
+ }},
+ superbowl:{label:'Super Bowl', cats:{
+  food:{label:'Food', opts:[
+   {t:'Wings & sliders', d:'The classic game-day spread',items:[
+    {n:'Chicken wings (5 lb)',v:'instacart',b:'guest',pg:0.5,pack:5,price:30},
+    {n:'Slider burgers, frozen (12)',v:'instacart',b:'guest',pg:2,pack:12,price:15},
+    {n:'Tortilla chips (family bag)',v:'instacart',b:'guest',pg:0.125,pack:1,price:5},
+    {n:'Guacamole (serves 10)',v:'instacart',b:'guest',pg:0.1,pack:1,price:9}]},
+   {t:'Nacho bar', d:'Build-your-own, feeds a crowd',items:[
+    {n:'Tortilla chips (family bag)',v:'instacart',b:'guest',pg:0.15,pack:1,price:5},
+    {n:'Ground beef (3 lb)',v:'instacart',b:'guest',pg:0.2,pack:3,price:18},
+    {n:'Cheese sauce (serves 10)',v:'instacart',b:'guest',pg:0.1,pack:1,price:6},
+    {n:'Toppings tray (serves 15)',v:'instacart',b:'guest',pg:0.067,pack:1,price:20}]},
+   {t:'Pizza party', d:'Zero cooking',items:[
+    {n:'Large pizza (8 slices)',v:'instacart',b:'guest',pg:3,pack:8,price:15},
+    {n:'Veggie tray (serves 15)',v:'instacart',b:'guest',pg:0.067,pack:1,price:25},
+    {n:'Cookies (24)',v:'instacart',b:'guest',pg:1,pack:24,price:10}]}]},
+  decor:{label:'Decorations', opts:[
+   {t:'Team colors', d:'Balloons and banner in your team’s colors',items:[
+    {n:'Football balloon set',v:'amazon',b:'fixed',q:1,price:18},
+    {n:'Game day banner',v:'amazon',b:'fixed',q:1,price:10},
+    {n:'Football plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Stadium', d:'Turf runners and goalposts',items:[
+    {n:'Turf table runner',v:'amazon',b:'guest',pg:0.1,pack:1,price:16},
+    {n:'Goalpost centerpieces',v:'amazon',b:'fixed',q:1,price:14},
+    {n:'Referee plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:16}]},
+   {t:'Minimal', d:'Just the essentials',items:[
+    {n:'Plates/napkins combo (serves 50)',v:'amazon',b:'guest',pg:1,pack:50,price:28}]}]},
+  drinks:{label:'Alcohol', opts:[
+   {t:'Beer bucket', d:'Light lager and IPA',items:[
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.7,dpu:30,price:25},
+    {n:'IPA (12-pack)',v:'alcohol',b:'drinks',share:0.3,dpu:12,price:20}]},
+   {t:'Beer & seltzer', d:'Half and half',items:[
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.5,dpu:30,price:25},
+    {n:'Hard seltzer (12-pack)',v:'alcohol',b:'drinks',share:0.5,dpu:12,price:20}]},
+   {t:'Beer & margaritas', d:'Add a pitcher drink',items:[
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.5,dpu:30,price:25},
+    {n:'Tequila blanco (750 ml)',v:'alcohol',b:'drinks',share:0.5,dpu:16,price:28},
+    {n:'Margarita mix (1.75 L)',v:'instacart',b:'drinks',share:0.5,dpu:10,price:6}]}]}
+ }}
+};
+const BASICS = [
+ {n:'Ice (10 lb bag)',v:'instacart',b:'guest',pg:0.15,pack:1,price:4,raw:true},
+ {n:'Plastic cups (50)',v:'amazon',b:'guest',pg:2,pack:50,price:8,raw:true},
+ {n:'Trash bags (20)',v:'amazon',b:'fixed',q:1,price:9}
+];
+
+let S = {occ:'stpat',guests:40,hours:4,budget:1200,drink:1,pick:{food:0,decor:0,drinks:0}};
+const $ = id=>document.getElementById(id);
+const money = n=>'$'+Math.round(n).toLocaleString();
+
+document.querySelectorAll('#drinkChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#drinkChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); S.drink=+c.dataset.v; if(!$('options').classList.contains('hidden')) render();
+}));
+
+function foodFactor(){ return S.hours<=3?1:1+0.15*(S.hours-3); }
+function totalDrinks(){ return S.guests*0.85*(2+Math.max(0,S.hours-1))*S.drink; }
+function line(it){
+  let packs;
+  if(it.b==='fixed') packs=it.q;
+  else if(it.b==='guest') packs=Math.ceil(S.guests*it.pg*(it.raw?1:foodFactor())/it.pack);
+  else packs=Math.ceil(totalDrinks()*it.share/it.dpu);
+  packs=Math.max(1,packs);
+  return {...it,packs,cost:packs*it.price};
+}
+function optCost(o){ return o.items.reduce((s,i)=>s+line(i).cost,0); }
+function selected(){
+  const cats=DATA[S.occ].cats; const out=[];
+  for(const k of ['food','decor','drinks']) out.push(...cats[k].opts[S.pick[k]].items.map(i=>({...line(i),cat:k})));
+  out.push(...BASICS.map(i=>({...line(i),cat:'basics'})));
+  return out;
+}
+
+$('setupForm').addEventListener('submit',e=>{
+  e.preventDefault();
+  const g=+$('guests').value,h=+$('hours').value,b=+$('budget').value,z=$('zip').value.trim();
+  let msg='';
+  if(!g||g<4||g>300) msg='Enter a guest count between 4 and 300.';
+  else if(!h||h<1||h>12) msg='Enter a party length between 1 and 12 hours.';
+  else if(!/^\d{5}$/.test(z)) msg='Enter a 5-digit zip code.';
+  else if(isNaN(b)||b<0) msg='Enter a budget (0 or more).';
+  $('err').textContent=msg; if(msg) return;
+  const occChanged = S.occ!==$('occ').value;
+  Object.assign(S,{occ:$('occ').value,guests:g,hours:h,budget:b});
+  if(occChanged) S.pick={food:0,decor:0,drinks:0};
+  $('options').classList.remove('hidden');
+  render();
+  $('options').scrollIntoView({behavior:'smooth'});
+});
+['guests','hours','budget','zip'].forEach(id=>$(id).addEventListener('input',()=>$('err').textContent=''));
+
+function render(){
+  const d=DATA[S.occ];
+  $('optTitle').textContent=`${d.label} for ${S.guests}, ${S.hours} hours`;
+  const cats=$('cats'); cats.innerHTML='';
+  ['food','decor','drinks'].forEach((k,ki)=>{
+    const c=d.cats[k]; const wrap=document.createElement('div'); wrap.className='cat';
+    const extra = k==='drinks' ? `<small>~${Math.round(totalDrinks())} drinks planned</small>` : '';
+    wrap.innerHTML=`<h3>${'abc'[ki]}) ${c.label} ${extra}</h3><div class="opts"></div>`;
+    const box=wrap.querySelector('.opts');
+    c.opts.forEach((o,i)=>{
+      const b=document.createElement('button'); b.type='button';
+      b.className='opt'+(S.pick[k]===i?' on':'');
+      const lis=o.items.map(it=>{const l=line(it);return `<li>${l.packs} × ${it.n}</li>`}).join('');
+      b.innerHTML=`<div class="t">${o.t}</div><div class="d">${o.d}</div><ul>${lis}</ul><div class="p">${money(optCost(o))}</div>`;
+      b.addEventListener('click',()=>{S.pick[k]=i;render(); if(!$('list').classList.contains('hidden')) renderList();});
+      box.appendChild(b);
+    });
+    cats.appendChild(wrap);
+  });
+  renderBudget();
+}
+
+function renderBudget(){
+  const items=selected(); const tot=items.reduce((s,i)=>s+i.cost,0);
+  $('total').textContent=money(tot);
+  $('pp').textContent=`${money(tot/S.guests)} per guest`;
+  const pct=S.budget>0?Math.min(100,tot/S.budget*100):100;
+  $('barFill').style.width=pct+'%';
+  const over=S.budget>0&&tot>S.budget; $('bar').classList.toggle('over',over);
+  $('status').innerHTML = S.budget>0 ? (over?`<span style="color:var(--warn)">${money(tot-S.budget)} over your ${money(S.budget)} budget</span>`:`<span style="color:var(--accent)">${money(S.budget-tot)} under your ${money(S.budget)} budget</span>`) : '';
+  const by=k=>items.filter(i=>i.cat===k).reduce((s,i)=>s+i.cost,0);
+  $('rows').innerHTML=[['Food','food'],['Decorations','decor'],['Alcohol','drinks'],['Basics','basics']].map(([l,k])=>`<div class="row"><span>${l}</span><span>${money(by(k))}</span></div>`).join('');
+}
+
+$('toList').addEventListener('click',()=>{ $('list').classList.remove('hidden'); renderList(); $('list').scrollIntoView({behavior:'smooth'}); });
+
+function renderList(){
+  const items=selected(); const host=$('vendors'); host.innerHTML='';
+  Object.keys(V).forEach(vk=>{
+    const its=items.filter(i=>i.v===vk); if(!its.length) return;
+    const sum=its.reduce((s,i)=>s+i.cost,0);
+    const box=document.createElement('div'); box.className='vbox';
+    const allQ = its.map(i=>i.n.replace(/\s*\(.*?\)/g,'')).slice(0,1)[0];
+    box.innerHTML=`<div class="vhead"><div><b>${V[vk].name}</b> · ${money(sum)}<div class="pp">${V[vk].desc}</div></div><a class="vlink" href="${V[vk].url(allQ)}" target="_blank" rel="noopener">Order on ${V[vk].name} →</a></div>
+      <table>${its.map(i=>`<tr><td class="q">${i.packs} ×</td><td>${i.n}<a href="${V[vk].url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener">find</a></td><td class="c">${money(i.cost)}</td></tr>`).join('')}</table>`;
+    host.appendChild(box);
+  });
+  const n=document.createElement('p'); n.className='note';
+  n.textContent='Alcohol orders require age verification at checkout and go through a licensed partner. Availability depends on your zip code.';
+  host.appendChild(n);
+}
+
+$('copyBtn').addEventListener('click',async()=>{
+  const items=selected(); const d=DATA[S.occ];
+  let txt=`${d.label} party, ${S.guests} guests, ${S.hours} hours\n`;
+  Object.keys(V).forEach(vk=>{const its=items.filter(i=>i.v===vk); if(!its.length) return;
+    txt+=`\n${V[vk].name}\n`+its.map(i=>`- ${i.packs} x ${i.n} (${money(i.cost)})`).join('\n')+'\n';});
+  txt+=`\nTotal: ${money(items.reduce((s,i)=>s+i.cost,0))}`;
+  try{ await navigator.clipboard.writeText(txt); $('toast').textContent='Copied'; }
+  catch(e){ $('toast').textContent='Copy not allowed here'; }
+  setTimeout(()=>$('toast').textContent='',2000);
+});
+
+// ---------- Save, share, reopen ----------
+const KEY='partypilot_parties';
+function flash(msg){ $('toast').textContent=msg; setTimeout(()=>$('toast').textContent='',2200); }
+function snapshot(){ return {occ:S.occ,guests:S.guests,hours:S.hours,budget:S.budget,drink:S.drink,pick:{...S.pick},date:$('date').value,zip:$('zip').value}; }
+function encode(st){ return btoa(unescape(encodeURIComponent(JSON.stringify(st)))); }
+function decode(s){ return JSON.parse(decodeURIComponent(escape(atob(s)))); }
+function loadSaved(){ try{ return JSON.parse(localStorage.getItem(KEY))||[]; }catch(e){ return []; } }
+function storeSaved(list){ try{ localStorage.setItem(KEY,JSON.stringify(list)); return true; }catch(e){ return false; } }
+
+function applyState(st){
+  if(!DATA[st.occ]) return;
+  Object.assign(S,{occ:st.occ,guests:+st.guests,hours:+st.hours,budget:+st.budget,drink:+st.drink||1,pick:{food:0,decor:0,drinks:0,...st.pick}});
+  $('occ').value=S.occ; $('guests').value=S.guests; $('hours').value=S.hours; $('budget').value=S.budget;
+  if(st.date) $('date').value=st.date; if(st.zip) $('zip').value=st.zip;
+  document.querySelectorAll('#drinkChips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===S.drink));
+  $('options').classList.remove('hidden'); $('list').classList.remove('hidden');
+  render(); renderList();
+}
+
+function renderSaved(){
+  const list=loadSaved(); $('saved').classList.toggle('hidden',!list.length);
+  $('savedList').innerHTML=list.map((p,i)=>`<div class="saved"><div><b>${p.name}</b><div class="pp">${p.total} · saved ${new Date(p.at).toLocaleDateString()}</div></div><div><button data-open="${i}">Open</button><button class="del" data-del="${i}">Delete</button></div></div>`).join('');
+  $('savedList').querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{applyState(loadSaved()[+b.dataset.open].state);$('options').scrollIntoView({behavior:'smooth'});}));
+  $('savedList').querySelectorAll('[data-del]').forEach(b=>b.addEventListener('click',()=>{const l=loadSaved();l.splice(+b.dataset.del,1);storeSaved(l);renderSaved();}));
+}
+
+$('saveBtn').addEventListener('click',()=>{
+  const st=snapshot(); const d=DATA[st.occ];
+  const when=st.date?new Date(st.date+'T12:00').toLocaleDateString(undefined,{month:'short',day:'numeric'}):'';
+  const name=`${d.label} · ${st.guests} guests${when?' · '+when:''}`;
+  const total=money(selected().reduce((s,i)=>s+i.cost,0));
+  const list=loadSaved(); list.unshift({name,total,at:Date.now(),state:st});
+  flash(storeSaved(list.slice(0,20))?'Saved':'Saving isn’t available in this browser');
+  renderSaved();
+});
+
+$('shareBtn').addEventListener('click',async()=>{
+  const url=location.origin+location.pathname+'?p='+encodeURIComponent(encode(snapshot()));
+  try{ await navigator.clipboard.writeText(url); flash('Link copied: anyone with it sees this plan'); }
+  catch(e){ flash('Copy not allowed here'); }
+});
+
+(function init(){
+  renderSaved();
+  const p=new URLSearchParams(location.search).get('p');
+  if(p){ try{ applyState(decode(p)); }catch(e){} }
+  if('serviceWorker' in navigator && location.protocol==='https:'){
+    navigator.serviceWorker.register('/sw.js').catch(()=>{});
+  }
+})();
+</script>
+</body>
+</html>
