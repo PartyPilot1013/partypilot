@@ -161,7 +161,7 @@ td a{color:var(--accent);font-size:12px;text-decoration:none;margin-left:6px}
       </div>
       <label for="fbText" style="margin-top:12px">What was missing or confusing? (optional)</label>
       <input id="fbText" type="text" placeholder="e.g. I wanted a vegetarian menu">
-      <div style="margin-top:12px"><a class="btn" id="fbSend" href="#" style="display:inline-block;text-decoration:none">Send feedback</a></div>
+      <div style="margin-top:12px"><button class="btn" id="fbSend" type="button">Send feedback</button></div>
       <div class="err" id="fbErr"></div>
     </div>
   </section>
@@ -414,8 +414,9 @@ const BASICS = [
  {n:'Trash bags (20)',v:'amazon',b:'fixed',q:1,price:9}
 ];
 
-// Where in-app feedback is emailed. Leave empty to hide the feedback card.
-const FEEDBACK_EMAIL = '';
+// Feedback goes to Mike's Google Form (responses land in its Google Sheet). Empty = hide the card.
+const FEEDBACK_FORM = 'https://docs.google.com/forms/d/e/1FAIpQLSfFQ52E12knTvhzk-T0vkR688cdEr8u4AuZpg7JznhijiIEfQ';
+const FEEDBACK_ENTRY = 'entry.976392872';
 DATA.stpat.date='2027-03-13'; DATA.superbowl.date='2027-02-14';
 
 let S = {occ:'friendsgiving',guests:20,hours:4,budget:600,drink:1,pick:{food:0,decor:0,drinks:0}};
@@ -574,17 +575,26 @@ document.querySelectorAll('#rateChips .chip').forEach(c=>c.addEventListener('cli
   document.querySelectorAll('#rateChips .chip').forEach(x=>x.classList.remove('on'));
   c.classList.add('on'); rating=c.dataset.v; $('fbErr').textContent='';
 }));
-$('fbSend').addEventListener('click',e=>{
-  if(!rating){ e.preventDefault(); $('fbErr').textContent='Pick one of the three answers first.'; return; }
+$('fbSend').addEventListener('click',async()=>{
+  if(!rating){ $('fbErr').textContent='Pick one of the three answers first.'; return; }
   const d=DATA[S.occ], cats=d.cats, tot=selected().reduce((s,i)=>s+i.cost,0);
   const body=[`Rating: ${rating}`,`Comment: ${$('fbText').value.trim()||'(none)'}`,'',
     `Party: ${d.label}, ${S.guests} guests, ${S.hours} hours, zip ${$('zip').value}`,
     `Budget: ${money(S.budget)} | Plan total: ${money(tot)}`,
     `Food: ${cats.food.opts[S.pick.food].t}`,`Decor: ${cats.decor.opts[S.pick.decor].t}`,`Drinks: ${cats.drinks.opts[S.pick.drinks].t}`].join('\n');
-  e.currentTarget.href=`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent('PartyPilot feedback: '+rating)}&body=${encodeURIComponent(body)}`;
+  const btn=$('fbSend'); btn.disabled=true; btn.textContent='Sending\u2026';
+  try{
+    const fd=new FormData(); fd.append(FEEDBACK_ENTRY,body);
+    await fetch(FEEDBACK_FORM+'/formResponse',{method:'POST',mode:'no-cors',body:fd});
+    $('feedback').innerHTML='<b>Thanks!</b><div class="pp">Your feedback was sent. It really helps.</div>';
+  }catch(err){
+    // Fallback: open the form with the answer already filled in
+    window.open(`${FEEDBACK_FORM}/viewform?usp=pp_url&${FEEDBACK_ENTRY}=${encodeURIComponent(body)}`,'_blank');
+    btn.disabled=false; btn.textContent='Send feedback';
+  }
 });
 $('fbText').addEventListener('input',()=>$('fbErr').textContent='');
-if(FEEDBACK_EMAIL) $('feedback').classList.remove('hidden');
+if(FEEDBACK_FORM) $('feedback').classList.remove('hidden');
 
 $('occ').addEventListener('change',()=>{ const dt=DATA[$('occ').value].date; if(dt) $('date').value=dt; });
 
