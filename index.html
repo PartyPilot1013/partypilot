@@ -11,6 +11,8 @@
 <link rel="apple-touch-icon" href="/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="PartyPilot">
+<script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
+<script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
@@ -106,12 +108,18 @@ td a{color:var(--accent);font-size:12px;text-decoration:none;margin-left:6px}
     <form id="setupForm" novalidate>
       <div class="form">
         <div><label for="occ">Occasion</label>
-          <select id="occ"><option value="stpat">St. Patrick's Day</option><option value="superbowl">Super Bowl</option></select></div>
-        <div><label for="guests">Guests</label><input id="guests" type="number" min="4" max="300" value="40"></div>
+          <select id="occ">
+            <option value="friendsgiving">Friendsgiving</option>
+            <option value="holiday">Holiday party</option>
+            <option value="nye">New Year's Eve</option>
+            <option value="superbowl">Super Bowl</option>
+            <option value="stpat">St. Patrick's Day</option>
+          </select></div>
+        <div><label for="guests">Guests</label><input id="guests" type="number" min="4" max="300" value="20"></div>
         <div><label for="hours">Party length (hours)</label><input id="hours" type="number" min="1" max="12" value="4"></div>
-        <div><label for="date">Date</label><input id="date" type="date" value="2027-03-13"></div>
+        <div><label for="date">Date</label><input id="date" type="date" value="2026-11-21"></div>
         <div><label for="zip">Zip code</label><input id="zip" type="text" inputmode="numeric" maxlength="5" value="02657"></div>
-        <div><label for="budget">Budget ($)</label><input id="budget" type="number" min="0" value="1200"></div>
+        <div><label for="budget">Budget ($)</label><input id="budget" type="number" min="0" value="600"></div>
       </div>
       <div style="margin-top:16px"><label>How much will this crowd drink?</label>
         <div class="chips" id="drinkChips">
@@ -142,6 +150,19 @@ td a{color:var(--accent);font-size:12px;text-decoration:none;margin-left:6px}
       <button class="btn ghost" id="shareBtn">Copy share link</button>
       <button class="btn ghost" id="copyBtn">Copy full list</button>
       <span class="toast" id="toast"></span>
+    </div>
+    <div class="vbox hidden" id="feedback" style="margin-top:22px;background:#fbfaf6">
+      <b>How did we do?</b>
+      <div class="pp" style="margin-bottom:10px">Takes 20 seconds and shapes what we build next.</div>
+      <div class="chips" id="rateChips">
+        <button type="button" class="chip" data-v="Loved it">Loved it</button>
+        <button type="button" class="chip" data-v="It was OK">It was OK</button>
+        <button type="button" class="chip" data-v="Not for me">Not for me</button>
+      </div>
+      <label for="fbText" style="margin-top:12px">What was missing or confusing? (optional)</label>
+      <input id="fbText" type="text" placeholder="e.g. I wanted a vegetarian menu">
+      <div style="margin-top:12px"><a class="btn" id="fbSend" href="#" style="display:inline-block;text-decoration:none">Send feedback</a></div>
+      <div class="err" id="fbErr"></div>
     </div>
   </section>
 </div>
@@ -252,6 +273,139 @@ const DATA = {
     {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.5,dpu:30,price:25},
     {n:'Tequila blanco (750 ml)',v:'alcohol',b:'drinks',share:0.5,dpu:16,price:28},
     {n:'Margarita mix (1.75 L)',v:'instacart',b:'drinks',share:0.5,dpu:10,price:6}]}]}
+ }},
+ friendsgiving:{label:'Friendsgiving', date:'2026-11-21', cats:{
+  food:{label:'Food', opts:[
+   {t:'Full feast', d:'You cook the whole dinner',items:[
+    {n:'Whole turkey (12 lb)',v:'instacart',b:'guest',pg:1.25,pack:12,price:25},
+    {n:'Stuffing mix (serves 6)',v:'instacart',b:'guest',pg:0.167,pack:1,price:4},
+    {n:'Potatoes for mash (5 lb)',v:'instacart',b:'guest',pg:0.1,pack:1,price:5},
+    {n:'Turkey gravy (jar, serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:3},
+    {n:'Cranberry sauce (can, serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:3},
+    {n:'Dinner rolls (12)',v:'instacart',b:'guest',pg:1.5,pack:12,price:5},
+    {n:'Pumpkin pie (serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:10}]},
+   {t:'You do the turkey, guests bring sides', d:'Potluck: you cover the main and dessert',items:[
+    {n:'Whole turkey (12 lb)',v:'instacart',b:'guest',pg:1.25,pack:12,price:25},
+    {n:'Turkey gravy (jar, serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:3},
+    {n:'Dinner rolls (12)',v:'instacart',b:'guest',pg:1.5,pack:12,price:5},
+    {n:'Pumpkin pie (serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:10}]},
+   {t:'Fully prepared', d:'No cooking: heat and serve',items:[
+    {n:'Prepared holiday dinner (serves 10)',v:'instacart',b:'guest',pg:0.1,pack:1,price:150},
+    {n:'Apple & pumpkin pies (serves 8)',v:'instacart',b:'guest',pg:0.125,pack:1,price:12}]}]},
+  decor:{label:'Decorations', opts:[
+   {t:'Harvest table', d:'Pumpkins, candles, warm tones',items:[
+    {n:'Fall leaf table runner',v:'amazon',b:'guest',pg:0.1,pack:1,price:15},
+    {n:'Faux pumpkin set',v:'amazon',b:'fixed',q:1,price:20},
+    {n:'Taper candles (12)',v:'amazon',b:'fixed',q:1,price:15},
+    {n:'Kraft plates & napkins (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:14}]},
+   {t:'Gratitude table', d:'Place cards and a thankful tree',items:[
+    {n:'Gratitude tree kit',v:'amazon',b:'fixed',q:1,price:18},
+    {n:'Leaf place cards (50)',v:'amazon',b:'guest',pg:1,pack:50,price:8},
+    {n:'Fall plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Minimal', d:'Just the essentials',items:[
+    {n:'Plates/napkins combo (serves 50)',v:'amazon',b:'guest',pg:1,pack:50,price:28}]}]},
+  drinks:{label:'Alcohol', opts:[
+   {t:'Wine-forward', d:'Reds and whites that go with turkey',items:[
+    {n:'Pinot noir (bottle)',v:'alcohol',b:'drinks',share:0.5,dpu:5,price:15},
+    {n:'Chardonnay (bottle)',v:'alcohol',b:'drinks',share:0.35,dpu:5,price:13},
+    {n:'Sparkling apple cider (non-alcoholic)',v:'instacart',b:'drinks',share:0.15,dpu:5,price:4}]},
+   {t:'Beer & wine', d:'Easy crowd-pleaser',items:[
+    {n:'Seasonal ale (12-pack)',v:'alcohol',b:'drinks',share:0.5,dpu:12,price:18},
+    {n:'Red & white wine (bottle)',v:'alcohol',b:'drinks',share:0.5,dpu:5,price:14}]},
+   {t:'Fall cocktails', d:'Bourbon cider plus wine',items:[
+    {n:'Bourbon (750 ml)',v:'alcohol',b:'drinks',share:0.4,dpu:16,price:30},
+    {n:'Apple cider (1 gallon)',v:'instacart',b:'drinks',share:0.4,dpu:10,price:6},
+    {n:'Red & white wine (bottle)',v:'alcohol',b:'drinks',share:0.6,dpu:5,price:14}]}]}
+ }},
+ holiday:{label:'Holiday party', date:'2026-12-19', cats:{
+  food:{label:'Food', opts:[
+   {t:'Cocktail party bites', d:'Passed apps and a big board',items:[
+    {n:'Shrimp cocktail ring (serves 10)',v:'instacart',b:'guest',pg:0.1,pack:1,price:25},
+    {n:'Cocktail meatballs, frozen (60)',v:'instacart',b:'guest',pg:4,pack:60,price:14},
+    {n:'Cheese & charcuterie tray (serves 12)',v:'instacart',b:'guest',pg:0.083,pack:1,price:35},
+    {n:'Holiday cookies (24)',v:'instacart',b:'guest',pg:1.5,pack:24,price:12}]},
+   {t:'Dinner buffet', d:'Ham, mac and cheese, salad',items:[
+    {n:'Spiral ham (8 lb, serves 16)',v:'instacart',b:'guest',pg:0.0625,pack:1,price:40},
+    {n:'Mac & cheese tray (serves 12)',v:'instacart',b:'guest',pg:0.083,pack:1,price:25},
+    {n:'Salad kit (serves 4)',v:'instacart',b:'guest',pg:0.25,pack:1,price:5},
+    {n:'Dinner rolls (12)',v:'instacart',b:'guest',pg:1.5,pack:12,price:5},
+    {n:'Holiday cookies (24)',v:'instacart',b:'guest',pg:1,pack:24,price:12}]},
+   {t:'Desserts & drinks', d:'A sweets table, no cooking',items:[
+    {n:'Mini cheesecakes (12)',v:'instacart',b:'guest',pg:1.5,pack:12,price:15},
+    {n:'Chocolate-covered strawberries (12)',v:'instacart',b:'guest',pg:1,pack:12,price:18},
+    {n:'Holiday cookies (24)',v:'instacart',b:'guest',pg:1.5,pack:24,price:12}]}]},
+  decor:{label:'Decorations', opts:[
+   {t:'Classic red & green', d:'Garland, lights, ornaments',items:[
+    {n:'Pine garland (9 ft)',v:'amazon',b:'fixed',q:2,price:15},
+    {n:'Warm string lights (50 ft)',v:'amazon',b:'fixed',q:1,price:18},
+    {n:'Ornament centerpiece set',v:'amazon',b:'fixed',q:1,price:20},
+    {n:'Holiday plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Winter white & silver', d:'Clean and glam',items:[
+    {n:'White & silver balloon garland kit',v:'amazon',b:'fixed',q:1,price:25},
+    {n:'Silver sequin table runner',v:'amazon',b:'guest',pg:0.1,pack:1,price:12},
+    {n:'White & silver plates (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:14}]},
+   {t:'Ugly sweater party', d:'Props and a prize',items:[
+    {n:'Ugly sweater party banner',v:'amazon',b:'fixed',q:1,price:10},
+    {n:'Photo booth props',v:'amazon',b:'fixed',q:1,price:12},
+    {n:'"Ugliest sweater" trophy',v:'amazon',b:'fixed',q:1,price:15},
+    {n:'Holiday plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]}]},
+  drinks:{label:'Alcohol', opts:[
+   {t:'Punch & bubbly', d:'A big-batch punch plus prosecco',items:[
+    {n:'Prosecco (bottle)',v:'alcohol',b:'drinks',share:0.4,dpu:5,price:14},
+    {n:'Vodka (750 ml) for punch',v:'alcohol',b:'drinks',share:0.3,dpu:16,price:22},
+    {n:'Cranberry juice (64 oz)',v:'instacart',b:'drinks',share:0.3,dpu:8,price:4},
+    {n:'Red wine (bottle)',v:'alcohol',b:'drinks',share:0.3,dpu:5,price:14}]},
+   {t:'Beer & wine', d:'Easy crowd-pleaser',items:[
+    {n:'Winter lager (12-pack)',v:'alcohol',b:'drinks',share:0.5,dpu:12,price:18},
+    {n:'Red & white wine (bottle)',v:'alcohol',b:'drinks',share:0.5,dpu:5,price:14}]},
+   {t:'Eggnog & bourbon', d:'Cozy classics',items:[
+    {n:'Eggnog (half gallon)',v:'instacart',b:'drinks',share:0.3,dpu:8,price:5},
+    {n:'Bourbon (750 ml)',v:'alcohol',b:'drinks',share:0.3,dpu:16,price:30},
+    {n:'Red & white wine (bottle)',v:'alcohol',b:'drinks',share:0.4,dpu:5,price:14},
+    {n:'Winter lager (12-pack)',v:'alcohol',b:'drinks',share:0.3,dpu:12,price:18}]}]}
+ }},
+ nye:{label:"New Year's Eve", date:'2026-12-31', cats:{
+  food:{label:'Food', opts:[
+   {t:'Midnight bites', d:'Classic finger food all night',items:[
+    {n:'Pigs in a blanket, frozen (48)',v:'instacart',b:'guest',pg:3,pack:48,price:14},
+    {n:'Shrimp cocktail ring (serves 10)',v:'instacart',b:'guest',pg:0.1,pack:1,price:25},
+    {n:'Cheese & charcuterie tray (serves 12)',v:'instacart',b:'guest',pg:0.083,pack:1,price:35},
+    {n:'Chocolate truffles (24)',v:'instacart',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Bubbly & bites', d:'A little fancy',items:[
+    {n:'Smoked salmon (1 lb)',v:'instacart',b:'guest',pg:0.08,pack:1,price:18},
+    {n:'Water crackers (box)',v:'instacart',b:'guest',pg:0.1,pack:1,price:4},
+    {n:'Cheese & charcuterie tray (serves 12)',v:'instacart',b:'guest',pg:0.083,pack:1,price:35},
+    {n:'Macarons (12)',v:'instacart',b:'guest',pg:1,pack:12,price:15}]},
+   {t:'Late-night pizza', d:'Low effort, high comfort',items:[
+    {n:'Large pizza (8 slices)',v:'instacart',b:'guest',pg:3,pack:8,price:15},
+    {n:'Chicken wings (5 lb)',v:'instacart',b:'guest',pg:0.3,pack:5,price:30},
+    {n:'Cookies (24)',v:'instacart',b:'guest',pg:1,pack:24,price:10}]}]},
+  decor:{label:'Decorations', opts:[
+   {t:'Black & gold', d:'Balloons, banner, hats and noisemakers',items:[
+    {n:'Black & gold balloon garland kit',v:'amazon',b:'fixed',q:1,price:25},
+    {n:'Happy New Year banner',v:'amazon',b:'fixed',q:1,price:10},
+    {n:'Party hats, tiaras & noisemakers (24)',v:'amazon',b:'guest',pg:1,pack:24,price:20},
+    {n:'Gold plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+   {t:'Silver glam', d:'Sequins and sparkle',items:[
+    {n:'Silver sequin table runner',v:'amazon',b:'guest',pg:0.1,pack:1,price:15},
+    {n:'Silver balloon set',v:'amazon',b:'fixed',q:1,price:20},
+    {n:'Party hats, tiaras & noisemakers (24)',v:'amazon',b:'guest',pg:1,pack:24,price:20},
+    {n:'Silver plates & napkins (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:14}]},
+   {t:'Minimal', d:'Hats and plates, done',items:[
+    {n:'Party hats & noisemakers (24)',v:'amazon',b:'guest',pg:1,pack:24,price:20},
+    {n:'Plates/napkins combo (serves 50)',v:'amazon',b:'guest',pg:1,pack:50,price:28}]}]},
+  drinks:{label:'Alcohol', opts:[
+   {t:'Toast + full bar', d:'Bubbly at midnight, cocktails all night',items:[
+    {n:'Prosecco (bottle)',v:'alcohol',b:'drinks',share:0.35,dpu:5,price:14},
+    {n:'Vodka (750 ml)',v:'alcohol',b:'drinks',share:0.35,dpu:16,price:22},
+    {n:'Mixers: soda & tonic (2 L)',v:'instacart',b:'drinks',share:0.35,dpu:8,price:3},
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.3,dpu:30,price:25}]},
+   {t:'All bubbly', d:'Prosecco all night, beer on the side',items:[
+    {n:'Prosecco (bottle)',v:'alcohol',b:'drinks',share:0.7,dpu:5,price:14},
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.3,dpu:30,price:25}]},
+   {t:'Beer + real Champagne', d:'Splurge on the toast',items:[
+    {n:'Light lager (30 cans)',v:'alcohol',b:'drinks',share:0.7,dpu:30,price:25},
+    {n:'Champagne (bottle)',v:'alcohol',b:'drinks',share:0.3,dpu:5,price:40}]}]}
  }}
 };
 const BASICS = [
@@ -260,7 +414,11 @@ const BASICS = [
  {n:'Trash bags (20)',v:'amazon',b:'fixed',q:1,price:9}
 ];
 
-let S = {occ:'stpat',guests:40,hours:4,budget:1200,drink:1,pick:{food:0,decor:0,drinks:0}};
+// Where in-app feedback is emailed. Leave empty to hide the feedback card.
+const FEEDBACK_EMAIL = '';
+DATA.stpat.date='2027-03-13'; DATA.superbowl.date='2027-02-14';
+
+let S = {occ:'friendsgiving',guests:20,hours:4,budget:600,drink:1,pick:{food:0,decor:0,drinks:0}};
 const $ = id=>document.getElementById(id);
 const money = n=>'$'+Math.round(n).toLocaleString();
 
@@ -409,6 +567,26 @@ $('shareBtn').addEventListener('click',async()=>{
   try{ await navigator.clipboard.writeText(url); flash('Link copied: anyone with it sees this plan'); }
   catch(e){ flash('Copy not allowed here'); }
 });
+
+// ---------- Feedback (emails the plan summary so we learn what people pick) ----------
+let rating='';
+document.querySelectorAll('#rateChips .chip').forEach(c=>c.addEventListener('click',()=>{
+  document.querySelectorAll('#rateChips .chip').forEach(x=>x.classList.remove('on'));
+  c.classList.add('on'); rating=c.dataset.v; $('fbErr').textContent='';
+}));
+$('fbSend').addEventListener('click',e=>{
+  if(!rating){ e.preventDefault(); $('fbErr').textContent='Pick one of the three answers first.'; return; }
+  const d=DATA[S.occ], cats=d.cats, tot=selected().reduce((s,i)=>s+i.cost,0);
+  const body=[`Rating: ${rating}`,`Comment: ${$('fbText').value.trim()||'(none)'}`,'',
+    `Party: ${d.label}, ${S.guests} guests, ${S.hours} hours, zip ${$('zip').value}`,
+    `Budget: ${money(S.budget)} | Plan total: ${money(tot)}`,
+    `Food: ${cats.food.opts[S.pick.food].t}`,`Decor: ${cats.decor.opts[S.pick.decor].t}`,`Drinks: ${cats.drinks.opts[S.pick.drinks].t}`].join('\n');
+  e.currentTarget.href=`mailto:${FEEDBACK_EMAIL}?subject=${encodeURIComponent('PartyPilot feedback: '+rating)}&body=${encodeURIComponent(body)}`;
+});
+$('fbText').addEventListener('input',()=>$('fbErr').textContent='');
+if(FEEDBACK_EMAIL) $('feedback').classList.remove('hidden');
+
+$('occ').addEventListener('change',()=>{ const dt=DATA[$('occ').value].date; if(dt) $('date').value=dt; });
 
 (function init(){
   renderSaved();
