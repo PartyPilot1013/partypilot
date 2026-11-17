@@ -1,4 +1,6 @@
-# PartyPilot
+# HostKit
+
+*Plan it. Shop it. Host it.*
 
 Plan a party in minutes: describe it, pick food, decorations and drinks, see a live budget, and get shopping lists split by store.
 

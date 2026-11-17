@@ -1,6 +1,6 @@
 {
-  "name": "PartyPilot",
-  "short_name": "PartyPilot",
+  "name": "HostKit",
+  "short_name": "HostKit",
   "description": "Plan the food, decorations and drinks for any party, with a live budget and ready-to-order shopping lists.",
   "start_url": "/",
   "display": "standalone",

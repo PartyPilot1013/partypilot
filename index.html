@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>PartyPilot</title>
+<title>HostKit: Plan it. Shop it. Host it.</title>
 <meta name="description" content="Plan the food, decorations and drinks for any party, with a live budget and ready-to-order shopping lists.">
 <meta name="theme-color" content="#1f7a4d">
 <link rel="manifest" href="/manifest.json">
 <link rel="icon" href="/icon-192.png">
 <link rel="apple-touch-icon" href="/icon-180.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="PartyPilot">
+<meta name="apple-mobile-web-app-title" content="HostKit">
 <script>window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };</script>
 <script defer src="/_vercel/insights/script.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -89,8 +89,8 @@ td a{color:var(--accent);font-size:12px;text-decoration:none;margin-left:6px}
 </head>
 <body>
 <header>
-  <h1 class="brand">Party<span>Pilot</span></h1>
-  <p class="tag">Tell us the party. We'll plan the food, the look and the bar, then fill your carts.</p>
+  <h1 class="brand">Host<span>Kit</span></h1>
+  <p class="tag"><b>Plan it. Shop it. Host it.</b> Tell us the party. We'll plan the food, the look and the bar, then fill your carts.</p>
   <span class="demo">Beta · prices are estimates</span>
 </header>
 
@@ -528,7 +528,9 @@ $('copyBtn').addEventListener('click',async()=>{
 });
 
 // ---------- Save, share, reopen ----------
-const KEY='partypilot_parties';
+const KEY='hostkit_parties';
+// Carry over parties saved under the old name
+try{ const old=localStorage.getItem('partypilot_parties'); if(old&&!localStorage.getItem(KEY)){ localStorage.setItem(KEY,old); localStorage.removeItem('partypilot_parties'); } }catch(e){}
 function flash(msg){ $('toast').textContent=msg; setTimeout(()=>$('toast').textContent='',2200); }
 function snapshot(){ return {occ:S.occ,guests:S.guests,hours:S.hours,budget:S.budget,drink:S.drink,pick:{...S.pick},date:$('date').value,zip:$('zip').value}; }
 function encode(st){ return btoa(unescape(encodeURIComponent(JSON.stringify(st)))); }
