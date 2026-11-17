@@ -178,6 +178,10 @@ main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
 .find{flex:none;min-height:36px;display:flex;align-items:center;padding:0 14px;border-radius:99px;border:1.5px solid var(--green);color:var(--green);text-decoration:none;font-size:13px;font-weight:700}
 .find:hover{background:var(--green-soft)}
 .s-alcohol .find{border-color:#7a2e22;color:#7a2e22}
+.amz .tick input:checked ~ .nm,.amz .tick input:checked ~ .nm *{text-decoration:none;color:inherit}
+.amz .tick input:checked ~ .nm b{color:var(--muted)}
+.amz .tick input:not(:checked) ~ .nm{color:#8f8573}
+.order.off{background:#cfc6b4;color:#5c5446;pointer-events:none}
 button.order{width:100%;border:0;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
 </style>
 </head>
@@ -426,11 +430,11 @@ const DATA = {
     {n:'Fall leaf table runner',v:'amazon',b:'guest',pg:0.1,pack:1,price:15},
     {n:'Faux pumpkin set',v:'amazon',b:'fixed',q:1,price:20},
     {n:'Taper candles (12)',v:'amazon',b:'fixed',q:1,price:15},
-    {n:'Kraft plates & napkins (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:14}]},
+    {n:'Ivory & gold tableware set (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:28}]},
    {t:'Gratitude table', d:'Place cards and a thankful tree',items:[
     {n:'Gratitude tree kit',v:'amazon',b:'fixed',q:1,price:18},
-    {n:'Leaf place cards (50)',v:'amazon',b:'guest',pg:1,pack:50,price:8},
-    {n:'Fall plates & napkins (serves 24)',v:'amazon',b:'guest',pg:1,pack:24,price:15}]},
+    {n:'Leaf place cards (50)',v:'amazon',b:'guest',pg:1,pack:50,price:9},
+    {n:'Ivory & gold tableware set (serves 25)',v:'amazon',b:'guest',pg:1,pack:25,price:28}]},
    {t:'Minimal', d:'Just the essentials',items:[
     {n:'Plates/napkins combo (serves 50)',v:'amazon',b:'guest',pg:1,pack:50,price:28}]}]},
   drinks:{label:'Alcohol', opts:[
@@ -537,6 +541,24 @@ const DATA = {
     {n:'Champagne (bottle)',v:'alcohol',b:'drinks',share:0.3,dpu:5,price:40}]}]}
  }}
 };
+// Specific Amazon products (ASINs) so selected items can go into one cart in one tap.
+// Keyed by item name: any occasion using that item gets the same product.
+const AMAZON_TAG = ''; // Amazon Associates tag, e.g. 'hostkit-20' (add once approved)
+const ASIN = {
+  'Fall leaf table runner':'B093W8G1HQ',
+  'Faux pumpkin set':'B09C1QY8SH',
+  'Taper candles (12)':'B076MPF8L8',
+  'Ivory & gold tableware set (serves 25)':'B0HBB29THF',
+  'Gratitude tree kit':'B0G2LDWTKF',
+  'Leaf place cards (50)':'B0H5V73VBL',
+  'Plates/napkins combo (serves 50)':'B0G9PBW9BN',
+  'Plastic cups (50)':'B0GZVFSV5S',
+  'Trash bags (20)':'B0000CNTBW'
+};
+function amazonCartUrl(list){
+  const q=list.map((i,ix)=>`ASIN.${ix+1}=${ASIN[i.n]}&Quantity.${ix+1}=${i.packs}`).join('&');
+  return 'https://www.amazon.com/gp/aws/cart/add.html?'+q+(AMAZON_TAG?`&AssociateTag=${AMAZON_TAG}&tag=${AMAZON_TAG}`:'');
+}
 const BASICS = [
  {n:'Ice (10 lb bag)',v:'instacart',b:'guest',pg:0.15,pack:1,price:4,raw:true},
  {n:'Plastic cups (50)',v:'amazon',b:'guest',pg:2,pack:50,price:8,raw:true},
@@ -635,6 +657,27 @@ const STORE_ICON={
   amazon:'<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',
   alcohol:'<path d="M7 3h10l-1 8.5a4 4 0 0 1-8 0z"/><path d="M12 15.5V21M8.5 21h7M7.4 7h9.2"/>'
 };
+function amazonBlock(its){
+  const rows=its.map((i,ix)=>{
+    const has=!!ASIN[i.n];
+    return `<li><label class="tick"><input type="checkbox" class="${has?'pick':''}" data-ix="${ix}" ${has?'checked':''} aria-label="${has?'Include':'Mark'} ${i.n}"><span class="nm"><b>${i.packs}\u00d7</b> ${i.n}<small>${money(i.cost)}${has?'':' \u00b7 add separately'}</small></span></label>${has?'':`<a class="find" href="${V.amazon.url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener">Find</a>`}</li>`;
+  }).join('');
+  return `<div class="amz"><p class="note" style="margin:10px 0 4px">Untick anything you already have, then add the rest to your Amazon cart in one tap.</p>
+    <ul class="shoplist">${rows}</ul>
+    <a class="order" href="#" target="_blank" rel="noopener">Add to Amazon cart</a></div>`;
+}
+function wireAmazon(box,its){
+  const btn=box.querySelector('a.order');
+  const update=()=>{
+    const sel=[...box.querySelectorAll('input.pick:checked')].map(c=>its[+c.dataset.ix]);
+    const sum=sel.reduce((s,i)=>s+i.cost,0);
+    if(sel.length){ btn.href=amazonCartUrl(sel); btn.classList.remove('off'); btn.removeAttribute('aria-disabled');
+      btn.innerHTML=`Add ${sel.length} to Amazon cart \u00b7 ${money(sum)}`; }
+    else { btn.removeAttribute('href'); btn.classList.add('off'); btn.setAttribute('aria-disabled','true'); btn.textContent='Pick at least one item'; }
+  };
+  box.querySelectorAll('input.pick').forEach(c=>c.addEventListener('change',update));
+  update();
+}
 function renderList(){
   const items=selected(); const host=$('vendors'); host.innerHTML='';
   const tot=items.reduce((s,i)=>s+i.cost,0); let stores=0;
@@ -647,12 +690,13 @@ function renderList(){
         <div class="sname"><b>${V[vk].name}</b><span>${V[vk].desc} · ${its.length} item${its.length>1?'s':''}</span></div>
         <div class="ssum">${money(sum)}</div>
       </div>
-      <details><summary>See the ${its.length} item${its.length>1?'s':''}</summary>
+      ${vk==='amazon' && its.some(i=>ASIN[i.n]) ? amazonBlock(its) : `<details><summary>See the ${its.length} item${its.length>1?'s':''}</summary>
         <ul class="shoplist">${its.map((i,ix)=>`<li><label class="tick"><input type="checkbox" aria-label="Mark ${i.n} as added"><span class="nm"><b>${i.packs}\u00d7</b> ${i.n}<small>${money(i.cost)}</small></span></label><a class="find" href="${V[vk].url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener" aria-label="Find ${i.n} on ${V[vk].name}">Find</a></li>`).join('')}</ul>
         <p class="note" style="margin:8px 0 0">Tap Find for each item, add it to your cart, then tick it off. One-tap carts are coming once HostKit is an approved ${V[vk].name} partner.</p>
       </details>
-      <button type="button" class="order">Shop the ${its.length} item${its.length>1?'s':''} on ${V[vk].name}</button>`;
-    box.querySelector('.order').addEventListener('click',()=>{const d=box.querySelector('details');d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});});
+      <button type="button" class="order">Shop the ${its.length} item${its.length>1?'s':''} on ${V[vk].name}</button>`}`;
+    if(box.querySelector('button.order')) box.querySelector('button.order').addEventListener('click',()=>{const d=box.querySelector('details');d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});});
+    if(box.querySelector('.amz')) wireAmazon(box,its);
     host.appendChild(box);
   });
   $('listSummary').textContent=`${stores} store${stores>1?'s':''} \u00b7 ${items.length} items \u00b7 ${money(tot)} total. Tap a store to order everything from it.`;
