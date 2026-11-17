@@ -183,6 +183,11 @@ main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
 .amz .tick input:not(:checked) ~ .nm{color:#8f8573}
 .order.off{background:#cfc6b4;color:#5c5446;pointer-events:none}
 button.order{width:100%;border:0;font:inherit;font-weight:700;font-size:16px;cursor:pointer}
+.howto{margin:8px 0 10px;padding:12px 14px 12px 32px;background:#f7f3ea;border-radius:12px;font-size:14px;line-height:1.5;color:#4a4337}
+.howto li{margin:2px 0}
+.howto b{color:var(--green)}
+.progress{margin:10px 0 0;font-size:14px;font-weight:700;color:var(--green)}
+.progress.done{background:var(--green-soft);padding:8px 12px;border-radius:10px}
 </style>
 </head>
 <body>
@@ -660,7 +665,7 @@ const STORE_ICON={
 function amazonBlock(its){
   const rows=its.map((i,ix)=>{
     const has=!!ASIN[i.n];
-    return `<li><label class="tick"><input type="checkbox" class="${has?'pick':''}" data-ix="${ix}" ${has?'checked':''} aria-label="${has?'Include':'Mark'} ${i.n}"><span class="nm"><b>${i.packs}\u00d7</b> ${i.n}<small>${money(i.cost)}${has?'':' \u00b7 add separately'}</small></span></label>${has?'':`<a class="find" href="${V.amazon.url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener">Find</a>`}</li>`;
+    return `<li><label class="tick"><input type="checkbox" class="${has?'pick':''}" data-ix="${ix}" ${has?'checked':''} aria-label="${has?'Include':'Mark'} ${i.n}"><span class="nm"><b>${i.packs}\u00d7</b> ${i.n}<small>${money(i.cost)}${has?'':' \u00b7 tap Find to add'}</small></span></label>${has?'':`<a class="find" href="${V.amazon.url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener">Find</a>`}</li>`;
   }).join('');
   return `<div class="amz"><p class="note" style="margin:10px 0 4px">Untick anything you already have, then add the rest to your Amazon cart in one tap.</p>
     <ul class="shoplist">${rows}</ul>
@@ -691,15 +696,28 @@ function renderList(){
         <div class="ssum">${money(sum)}</div>
       </div>
       ${vk==='amazon' && its.some(i=>ASIN[i.n]) ? amazonBlock(its) : `<details><summary>See the ${its.length} item${its.length>1?'s':''}</summary>
+        <ol class="howto">
+          <li>Tap <b>Find</b> next to an item. ${V[vk].name} opens in a new tab.</li>
+          <li>Add the item to your ${V[vk].name} cart.</li>
+          <li>Switch back to HostKit and tick the item off.</li>
+          <li>Move to the next item. Repeat until every item is ticked and your cart is complete.</li>
+        </ol>
         <ul class="shoplist">${its.map((i,ix)=>`<li><label class="tick"><input type="checkbox" aria-label="Mark ${i.n} as added"><span class="nm"><b>${i.packs}\u00d7</b> ${i.n}<small>${money(i.cost)}</small></span></label><a class="find" href="${V[vk].url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener" aria-label="Find ${i.n} on ${V[vk].name}">Find</a></li>`).join('')}</ul>
-        <p class="note" style="margin:8px 0 0">Tap Find for each item, add it to your cart, then tick it off. One-tap carts are coming once HostKit is an approved ${V[vk].name} partner.</p>
+        <p class="progress" aria-live="polite">0 of ${its.length} in your cart</p>
+        <p class="note" style="margin:6px 0 0">One-tap carts are coming once HostKit is an approved ${V[vk].name} partner.</p>
       </details>
       <button type="button" class="order">Shop the ${its.length} item${its.length>1?'s':''} on ${V[vk].name}</button>`}`;
     if(box.querySelector('button.order')) box.querySelector('button.order').addEventListener('click',()=>{const d=box.querySelector('details');d.open=true;d.scrollIntoView({behavior:'smooth',block:'start'});});
     if(box.querySelector('.amz')) wireAmazon(box,its);
+    const prog=box.querySelector('.progress');
+    if(prog){ const boxes=[...box.querySelectorAll('.shoplist input[type=checkbox]')];
+      const upd=()=>{ const n=boxes.filter(b=>b.checked).length;
+        prog.textContent = n===boxes.length ? `All ${n} items are in your cart. This store is done.` : `${n} of ${boxes.length} in your cart`;
+        prog.classList.toggle('done', n===boxes.length); };
+      boxes.forEach(b=>b.addEventListener('change',upd)); upd(); }
     host.appendChild(box);
   });
-  $('listSummary').textContent=`${stores} store${stores>1?'s':''} \u00b7 ${items.length} items \u00b7 ${money(tot)} total. Tap a store to order everything from it.`;
+  $('listSummary').textContent=`${stores} store${stores>1?'s':''} \u00b7 ${items.length} items \u00b7 ${money(tot)} total. Work through each store's list below.`;
   const n=document.createElement('p'); n.className='note';
   n.textContent='Prices are estimates. Alcohol orders need age verification at checkout and go through a licensed retailer; availability depends on your zip code.';
   host.appendChild(n);
