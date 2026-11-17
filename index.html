@@ -143,6 +143,28 @@ main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
 .q .chips{flex-wrap:nowrap}.q .chip{flex:1;padding:9px 6px;text-align:center}
 .btn.big{width:100%;max-width:340px;min-height:56px;font-size:17px;border-radius:14px}
 @media(max-width:760px){.btn.big{max-width:none}}
+.store{border:1px solid var(--line);border-radius:18px;background:#fff;padding:18px;margin-bottom:14px}
+.shead{display:flex;align-items:center;gap:14px}
+.sicon{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center}
+.s-instacart .sicon{background:var(--green-soft);color:var(--green)}
+.s-amazon .sicon{background:#f6ecd2;color:#8a6a1f}
+.s-alcohol .sicon{background:#f4e3e0;color:#7a2e22}
+.sname{flex:1;min-width:0;display:flex;flex-direction:column}
+.sname b{font-family:var(--serif);font-weight:600;font-size:20px;line-height:1.2}
+.sname span{font-size:13px;color:var(--muted)}
+.ssum{font-family:var(--serif);font-size:24px;font-weight:500;color:var(--green)}
+.store details{margin:12px 0 0}
+.store summary{cursor:pointer;font-size:14px;font-weight:600;color:var(--green);padding:8px 0;list-style:none;display:flex;align-items:center;gap:6px}
+.store summary::-webkit-details-marker{display:none}
+.store summary::before{content:"";width:7px;height:7px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(-45deg);transition:transform .15s;margin-right:4px}
+.store details[open] summary::before{transform:rotate(45deg)}
+.order{display:flex;align-items:center;justify-content:center;gap:8px;margin-top:12px;min-height:52px;border-radius:14px;background:var(--green);color:#f7f3ea;text-decoration:none;font-weight:700;font-size:16px}
+.order:hover{background:var(--green-dk)}
+.s-alcohol .order{background:#7a2e22}.s-alcohol .order:hover{background:#5e2219}
+.actions{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:8px}
+.actions .btn{font-size:15px;padding:12px 10px}
+@media(max-width:520px){.actions{grid-template-columns:1fr 1fr}.actions .btn:first-child{grid-column:1/3}}
+.toast{min-height:20px;margin-top:8px}
 </style>
 </head>
 <body>
@@ -236,14 +258,14 @@ main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
   <section class="card hidden" id="list">
     <div class="step">Step 3 of 3</div>
     <h2>Your shopping list</h2>
-    <p class="sub">Split by where it ships from. In the full app each button fills a cart in one tap; in this prototype the links search each store.</p>
+    <p class="sub" id="listSummary">Split by store, so you can order everything in a few taps.</p>
     <div id="vendors" class="vend"></div>
-    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
-      <button class="btn" id="saveBtn">Save party</button>
+    <div class="actions">
+      <button class="btn ghost" id="saveBtn">Save party</button>
       <button class="btn ghost" id="shareBtn">Copy share link</button>
-      <button class="btn ghost" id="copyBtn">Copy full list</button>
-      <span class="toast" id="toast"></span>
+      <button class="btn ghost" id="copyBtn">Copy list</button>
     </div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
     <div class="vbox hidden" id="feedback" style="margin-top:22px;background:#fbfaf6">
       <b>How did we do?</b>
       <div class="pp" style="margin-bottom:10px">Takes 20 seconds and shapes what we build next.</div>
@@ -277,7 +299,7 @@ main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
 const V = {
   instacart:{name:'Instacart', desc:'Food, ice & mixers', url:q=>'https://www.instacart.com/store/s?k='+encodeURIComponent(q)},
   amazon:{name:'Amazon', desc:'Decorations & supplies', url:q=>'https://www.amazon.com/s?k='+encodeURIComponent(q)},
-  alcohol:{name:'Alcohol partner', desc:'Licensed delivery (e.g. ReserveBar)', url:q=>'https://www.reservebar.com/search?q='+encodeURIComponent(q)}
+  alcohol:{name:'ReserveBar', desc:'Beer, wine & spirits · 21+', url:q=>'https://www.reservebar.com/search?q='+encodeURIComponent(q)}
 };
 // basis: guest (perGuest units, scaled by food factor) | fixed (qty) | drinks (share of total drinks, dpu drinks per pack)
 const DATA = {
@@ -594,19 +616,33 @@ function renderBudget(){
 
 $('toList').addEventListener('click',()=>{ $('list').classList.remove('hidden'); renderList(); $('list').scrollIntoView({behavior:'smooth'}); });
 
+const STORE_ICON={
+  instacart:'<path d="M4 9h16l-1.6 10.2a1 1 0 0 1-1 .8H6.6a1 1 0 0 1-1-.8z"/><path d="M8.5 9l3.5-5 3.5 5"/>',
+  amazon:'<path d="M12 3l2.2 5.8L20 11l-5.8 2.2L12 19l-2.2-5.8L4 11l5.8-2.2z"/>',
+  alcohol:'<path d="M7 3h10l-1 8.5a4 4 0 0 1-8 0z"/><path d="M12 15.5V21M8.5 21h7M7.4 7h9.2"/>'
+};
 function renderList(){
   const items=selected(); const host=$('vendors'); host.innerHTML='';
+  const tot=items.reduce((s,i)=>s+i.cost,0); let stores=0;
   Object.keys(V).forEach(vk=>{
-    const its=items.filter(i=>i.v===vk); if(!its.length) return;
+    const its=items.filter(i=>i.v===vk); if(!its.length) return; stores++;
     const sum=its.reduce((s,i)=>s+i.cost,0);
-    const box=document.createElement('div'); box.className='vbox';
-    const allQ = its.map(i=>i.n.replace(/\s*\(.*?\)/g,'')).slice(0,1)[0];
-    box.innerHTML=`<div class="vhead"><div><b>${V[vk].name}</b> · ${money(sum)}<div class="pp">${V[vk].desc}</div></div><a class="vlink" href="${V[vk].url(allQ)}" target="_blank" rel="noopener">Order on ${V[vk].name} →</a></div>
-      <table>${its.map(i=>`<tr><td class="q">${i.packs} ×</td><td>${i.n}<a href="${V[vk].url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener">find</a></td><td class="c">${money(i.cost)}</td></tr>`).join('')}</table>`;
+    const q=its[0].n.replace(/\s*\(.*?\)/g,'');
+    const box=document.createElement('div'); box.className='store s-'+vk;
+    box.innerHTML=`<div class="shead">
+        <span class="sicon"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${STORE_ICON[vk]}</svg></span>
+        <div class="sname"><b>${V[vk].name}</b><span>${V[vk].desc} · ${its.length} item${its.length>1?'s':''}</span></div>
+        <div class="ssum">${money(sum)}</div>
+      </div>
+      <details><summary>See the ${its.length} item${its.length>1?'s':''}</summary>
+        <table>${its.map(i=>`<tr><td class="q">${i.packs}\u00d7</td><td>${i.n}<a href="${V[vk].url(i.n.replace(/\s*\(.*?\)/g,''))}" target="_blank" rel="noopener" aria-label="Find ${i.n} on ${V[vk].name}">find</a></td><td class="c">${money(i.cost)}</td></tr>`).join('')}</table>
+      </details>
+      <a class="order" href="${V[vk].url(q)}" target="_blank" rel="noopener">Order on ${V[vk].name} <span aria-hidden="true">\u2192</span></a>`;
     host.appendChild(box);
   });
+  $('listSummary').textContent=`${stores} store${stores>1?'s':''} \u00b7 ${items.length} items \u00b7 ${money(tot)} total. Tap a store to order everything from it.`;
   const n=document.createElement('p'); n.className='note';
-  n.textContent='Alcohol orders require age verification at checkout and go through a licensed partner. Availability depends on your zip code.';
+  n.textContent='Prices are estimates. Alcohol orders need age verification at checkout and go through a licensed retailer; availability depends on your zip code.';
   host.appendChild(n);
 }
 
