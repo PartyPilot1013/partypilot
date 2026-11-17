@@ -110,6 +110,39 @@ td a{color:var(--green);font-size:12px;text-decoration:none;margin-left:6px;font
   .side .bar{grid-column:1/3;grid-row:2}
   .side .status{grid-column:1/3;grid-row:3;font-size:13px}
 }
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);border:0}
+.tiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:4px 0 26px}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}.tiles .tile:last-child{grid-column:1/3}}
+.tile{display:flex;flex-direction:column;align-items:flex-start;gap:6px;min-height:118px;padding:16px 14px;border:1px solid var(--line);border-radius:16px;background:#fff;color:var(--green);font:inherit;text-align:left;cursor:pointer;transition:border-color .15s,background .15s,transform .1s}
+.tile:hover{border-color:#bfb193}
+.tile:active{transform:scale(.98)}
+.tile .tn{margin-top:auto;font-weight:700;font-size:15px;color:var(--ink);line-height:1.25}
+.tile .td{font-size:12px;color:var(--muted);font-weight:500}
+.tile.on{background:var(--green);border-color:var(--green);color:var(--gold)}
+.tile.on .tn{color:#f7f3ea}.tile.on .td{color:#c9d8cf}
+.qgrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px 18px}
+@media(max-width:760px){.qgrid{grid-template-columns:1fr 1fr}}
+@media(max-width:420px){.qgrid{grid-template-columns:1fr}}
+.stepper{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:#fff;overflow:hidden}
+.stepper input{border:0;text-align:center;font-size:18px;font-weight:700;min-height:48px;border-radius:0;-moz-appearance:textfield}
+.stepper input::-webkit-outer-spin-button,.stepper input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+.stepper input:focus{outline:none}
+.stepper:focus-within{outline:3px solid #cfdcd3;border-color:var(--green)}
+.sbtn{flex:none;width:48px;height:48px;border:0;background:var(--green-soft);color:var(--green);font-size:22px;font-weight:600;cursor:pointer}
+.sbtn:hover{background:#dbe6dd}
+.money{display:flex;align-items:center;border:1px solid var(--line);border-radius:12px;background:#fff;padding-left:14px}
+.money span{font-weight:700;color:var(--muted)}
+.money input{border:0;font-size:18px;font-weight:700;min-height:48px}
+.money input:focus{outline:none}
+.money:focus-within{outline:3px solid #cfdcd3;border-color:var(--green)}
+.hint{font-size:12px;color:var(--muted);margin-top:6px}
+.hint button{border:0;background:none;color:var(--green);font:inherit;font-weight:700;cursor:pointer;padding:0;text-decoration:underline}
+.cta{margin-top:26px}
+main:has(.side.hidden){grid-template-columns:minmax(0,1fr)}
+@media(max-width:900px){main:has(.side.hidden){padding-bottom:60px}}
+.q .chips{flex-wrap:nowrap}.q .chip{flex:1;padding:9px 6px;text-align:center}
+.btn.big{width:100%;max-width:340px;min-height:56px;font-size:17px;border-radius:14px}
+@media(max-width:760px){.btn.big{max-width:none}}
 </style>
 </head>
 <body>
@@ -127,38 +160,73 @@ td a{color:var(--green);font-size:12px;text-decoration:none;margin-left:6px;font
   </section>
 
   <section class="card" id="setup">
-    <div class="step">Step 1</div>
-    <h2>Describe the party</h2>
-    <p class="sub">Five quick answers. You can tweak everything on the next screen.</p>
+    <div class="step">Step 1 of 3</div>
+    <h2>What are we celebrating?</h2>
+    <p class="sub">Pick the occasion and a few details. You can change anything on the next screen.</p>
     <form id="setupForm" novalidate>
-      <div class="form">
-        <div><label for="occ">Occasion</label>
-          <select id="occ">
+      <label for="occ" class="sr-only">Occasion</label>
+      <select id="occ" class="sr-only" tabindex="-1" aria-hidden="true">
             <option value="friendsgiving">Friendsgiving</option>
             <option value="holiday">Holiday party</option>
             <option value="nye">New Year's Eve</option>
             <option value="superbowl">Super Bowl</option>
             <option value="stpat">St. Patrick's Day</option>
-          </select></div>
-        <div><label for="guests">Guests</label><input id="guests" type="number" min="4" max="300" value="20"></div>
-        <div><label for="hours">Party length (hours)</label><input id="hours" type="number" min="1" max="12" value="4"></div>
-        <div><label for="date">Date</label><input id="date" type="date" value="2026-11-21"></div>
-        <div><label for="zip">Zip code</label><input id="zip" type="text" inputmode="numeric" maxlength="5" value="02657"></div>
-        <div><label for="budget">Budget ($)</label><input id="budget" type="number" min="0" value="600"></div>
+      </select>
+      <div class="tiles" role="group" aria-label="Occasion">
+        <button type="button" class="tile on" data-occ="friendsgiving" aria-pressed="true"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19c0-8 6-14 14-14 0 8-6 14-14 14z"/><path d="M5 19l8-8"/></svg><span class="tn">Friendsgiving</span><span class="td">Late November</span></button>
+        <button type="button" class="tile" data-occ="holiday" aria-pressed="false"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l5 7h-3l4 6H6l4-6H7z"/><path d="M12 16v5"/></svg><span class="tn">Holiday party</span><span class="td">December</span></button>
+        <button type="button" class="tile" data-occ="nye" aria-pressed="false"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6.3 6.3l2.5 2.5M15.2 15.2l2.5 2.5M6.3 17.7l2.5-2.5M15.2 8.8l2.5-2.5"/></svg><span class="tn">New Year's Eve</span><span class="td">Dec 31</span></button>
+        <button type="button" class="tile" data-occ="superbowl" aria-pressed="false"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><ellipse cx="12" cy="12" rx="9.5" ry="5.5" transform="rotate(-40 12 12)"/><path d="M9.5 14.5l5-5M10.5 11.5l2 2M12.5 9.5l2 2"/></svg><span class="tn">Super Bowl</span><span class="td">February</span></button>
+        <button type="button" class="tile" data-occ="stpat" aria-pressed="false"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="7.5" r="3.3"/><circle cx="7.8" cy="12.5" r="3.3"/><circle cx="16.2" cy="12.5" r="3.3"/><path d="M12 13v8"/></svg><span class="tn">St. Patrick's Day</span><span class="td">March 17</span></button>
       </div>
-      <div style="margin-top:16px"><label>How much will this crowd drink?</label>
-        <div class="chips" id="drinkChips">
-          <button type="button" class="chip" data-v="0.7">Light</button>
-          <button type="button" class="chip on" data-v="1">Average</button>
-          <button type="button" class="chip" data-v="1.3">Heavy</button>
-        </div></div>
-      <div style="margin-top:18px"><button class="btn" type="submit">Show me options</button></div>
+
+      <div class="qgrid">
+        <div class="q">
+          <label for="guests">How many guests?</label>
+          <div class="stepper">
+            <button type="button" class="sbtn" data-step="guests" data-d="-1" aria-label="Fewer guests">&minus;</button>
+            <input id="guests" type="number" min="4" max="300" value="20" inputmode="numeric">
+            <button type="button" class="sbtn" data-step="guests" data-d="1" aria-label="More guests">+</button>
+          </div>
+        </div>
+        <div class="q">
+          <label for="hours">How long? (hours)</label>
+          <div class="stepper">
+            <button type="button" class="sbtn" data-step="hours" data-d="-1" aria-label="Shorter">&minus;</button>
+            <input id="hours" type="number" min="1" max="12" value="4" inputmode="numeric">
+            <button type="button" class="sbtn" data-step="hours" data-d="1" aria-label="Longer">+</button>
+          </div>
+        </div>
+        <div class="q">
+          <label for="budget">Budget</label>
+          <div class="money"><span aria-hidden="true">$</span><input id="budget" type="number" min="0" value="600" inputmode="numeric"></div>
+          <div class="hint" id="budgetHint"></div>
+        </div>
+        <div class="q">
+          <label for="date">Date</label>
+          <input id="date" type="date" value="2026-11-21">
+        </div>
+        <div class="q">
+          <label for="zip">Zip code</label>
+          <input id="zip" type="text" inputmode="numeric" maxlength="5" value="02657" autocomplete="postal-code">
+          <div class="hint">For delivery and local prices</div>
+        </div>
+        <div class="q">
+          <label>How much will they drink?</label>
+          <div class="chips" id="drinkChips">
+            <button type="button" class="chip" data-v="0.7">Light</button>
+            <button type="button" class="chip on" data-v="1">Average</button>
+            <button type="button" class="chip" data-v="1.3">Heavy</button>
+          </div>
+        </div>
+      </div>
+      <div class="cta"><button class="btn big" type="submit">Plan my party</button></div>
       <div class="err" id="err"></div>
     </form>
   </section>
 
   <section class="card hidden" id="options">
-    <div class="step">Step 2</div>
+    <div class="step">Step 2 of 3</div>
     <h2 id="optTitle">Pick your plan</h2>
     <p class="sub">Choose one in each category. Quantities are sized to your guest count and party length.</p>
     <div id="cats"></div>
@@ -166,7 +234,7 @@ td a{color:var(--green);font-size:12px;text-decoration:none;margin-left:6px;font
   </section>
 
   <section class="card hidden" id="list">
-    <div class="step">Step 3</div>
+    <div class="step">Step 3 of 3</div>
     <h2>Your shopping list</h2>
     <p class="sub">Split by where it ships from. In the full app each button fills a cart in one tap; in this prototype the links search each store.</p>
     <div id="vendors" class="vend"></div>
@@ -192,7 +260,7 @@ td a{color:var(--green);font-size:12px;text-decoration:none;margin-left:6px;font
   </section>
 </div>
 
-<aside class="side">
+<aside class="side hidden" id="sidePanel">
   <div class="card">
     <div class="step">Live budget</div>
     <div class="total" id="total">$0</div>
@@ -490,6 +558,7 @@ $('setupForm').addEventListener('submit',e=>{
 ['guests','hours','budget','zip'].forEach(id=>$(id).addEventListener('input',()=>$('err').textContent=''));
 
 function render(){
+  $('sidePanel').classList.remove('hidden');
   const d=DATA[S.occ];
   $('optTitle').textContent=`${d.label} for ${S.guests}, ${S.hours} hours`;
   const cats=$('cats'); cats.innerHTML='';
@@ -566,7 +635,7 @@ function storeSaved(list){ try{ localStorage.setItem(KEY,JSON.stringify(list)); 
 function applyState(st){
   if(!DATA[st.occ]) return;
   Object.assign(S,{occ:st.occ,guests:+st.guests,hours:+st.hours,budget:+st.budget,drink:+st.drink||1,pick:{food:0,decor:0,drinks:0,...st.pick}});
-  $('occ').value=S.occ; $('guests').value=S.guests; $('hours').value=S.hours; $('budget').value=S.budget;
+  $('occ').value=S.occ; if(typeof syncTiles==='function') syncTiles(); $('guests').value=S.guests; $('hours').value=S.hours; $('budget').value=S.budget;
   if(st.date) $('date').value=st.date; if(st.zip) $('zip').value=st.zip;
   document.querySelectorAll('#drinkChips .chip').forEach(c=>c.classList.toggle('on',+c.dataset.v===S.drink));
   $('options').classList.remove('hidden'); $('list').classList.remove('hidden');
@@ -624,6 +693,28 @@ $('fbText').addEventListener('input',()=>$('fbErr').textContent='');
 if(FEEDBACK_FORM) $('feedback').classList.remove('hidden');
 
 $('occ').addEventListener('change',()=>{ const dt=DATA[$('occ').value].date; if(dt) $('date').value=dt; });
+
+
+// ---------- Inviting setup: occasion tiles, steppers, budget hint ----------
+document.querySelectorAll('.tile').forEach(t=>t.addEventListener('click',()=>{
+  document.querySelectorAll('.tile').forEach(x=>{x.classList.remove('on');x.setAttribute('aria-pressed','false');});
+  t.classList.add('on'); t.setAttribute('aria-pressed','true');
+  $('occ').value=t.dataset.occ; $('occ').dispatchEvent(new Event('change'));
+}));
+document.querySelectorAll('.sbtn').forEach(b=>b.addEventListener('click',()=>{
+  const inp=$(b.dataset.step), lo=+inp.min, hi=+inp.max;
+  const step=b.dataset.step==='guests'&&+inp.value>=30?5:1;
+  inp.value=Math.min(hi,Math.max(lo,(+inp.value||lo)+step*(+b.dataset.d)));
+  inp.dispatchEvent(new Event('input'));
+}));
+function budgetHint(){
+  const g=+$('guests').value||0, sug=Math.round(g*30/50)*50;
+  $('budgetHint').innerHTML = g ? `Typical: about $30 a guest (<button type="button" id="useSug">use $${sug.toLocaleString()}</button>)` : '';
+  const u=$('useSug'); if(u) u.addEventListener('click',()=>{ $('budget').value=sug; });
+}
+$('guests').addEventListener('input',budgetHint);
+budgetHint();
+function syncTiles(){ document.querySelectorAll('.tile').forEach(x=>{const on=x.dataset.occ===$('occ').value;x.classList.toggle('on',on);x.setAttribute('aria-pressed',on?'true':'false');}); }
 
 (function init(){
   renderSaved();
